@@ -3,17 +3,15 @@ package com.jax.customview.presentation
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
-
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
-import android.os.Build
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.alpha
 import com.jax.customview.R
 import com.jax.customview.utils.MenuList
 import kotlin.math.atan2
@@ -35,8 +33,10 @@ class ArcView(
         style = Paint.Style.FILL
         strokeWidth = 1f
         color = Color.BLACK
-        textSize = 100f
+        textSize = 80f
     }
+    private val paintBitMapImage = Paint()
+
     private val startAngle = -180f
     private val useCenter = false
     private val colors = listOf(
@@ -52,12 +52,12 @@ class ArcView(
     private var buttonClicked = -1
     private val spacer = 1f
     private val elementsCount = colors.size - 1
-    private lateinit var centerImageBitMap: Bitmap
 
     override fun onDraw(canvas: Canvas) {
         drawArcs(canvas)
         drawCenterCircle(canvas)
         drawWords(canvas)
+        drawImage(canvas)
     }
 
     private fun drawArcs(canvas: Canvas) {
@@ -66,7 +66,7 @@ class ArcView(
         val radius = width.coerceAtMost(height) / 2f - mainPainter.strokeWidth / 2f
         mainPainter.style = Paint.Style.STROKE
         for (i in 0..elementsCount) {
-            mainPainter.color = if (i == buttonClicked) Color.GRAY else colors[i]
+            mainPainter.color = if (i == buttonClicked) Color.LTGRAY else colors[i]
             canvas.drawArc(
                 centerX - radius,
                 centerY - radius,
@@ -84,7 +84,7 @@ class ArcView(
         val centerX = width / 2f
         val centerY = height / 2f
         val radius = width.coerceAtMost(height) / 2f
-        mainPainter.color = Color.GRAY
+        mainPainter.color = Color.WHITE
         mainPainter.style = Paint.Style.FILL
         canvas.drawCircle(
             centerX,
@@ -157,6 +157,28 @@ class ArcView(
         return (adjustedAngle / sweepAngle).toInt()
     }
 
+    private fun drawImage(canvas: Canvas) {
+        val centerImageBitMap = Bitmap.createBitmap(
+            150,
+            150,
+            Bitmap.Config.ARGB_8888
+        )
 
+        val imageCanvas = Canvas(centerImageBitMap)
 
+        val drawable = ContextCompat.getDrawable(
+            context,
+            R.drawable.expires_soon_icon
+        )
+
+        drawable?.setBounds(0, 0, 150, 150)
+        drawable?.draw(imageCanvas)
+
+        canvas.drawBitmap(
+            centerImageBitMap,
+            width / 2 - centerImageBitMap.width / 2f,
+            height / 2 - centerImageBitMap.height / 2f,
+            paintBitMapImage
+        )
+    }
 }
