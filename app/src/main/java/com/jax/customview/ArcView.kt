@@ -15,6 +15,8 @@ class ArcView(
     attributeSet: AttributeSet
 ) : View(context, attributeSet) {
 
+    var onArcClickListener: ((index: Int) -> Unit)? = null
+
     private val paint = Paint()
     private val startAngle = -180f
     private val useCenter = true
@@ -36,6 +38,7 @@ class ArcView(
 
     override fun onDraw(canvas: Canvas) {
         drawArcs(canvas)
+        drawCenterCircle(canvas)
     }
 
     private fun drawArcs(canvas: Canvas) {
@@ -56,6 +59,18 @@ class ArcView(
             )
         }
     }
+    private fun drawCenterCircle(canvas: Canvas){
+        val centerX = width / 2f
+        val centerY = height / 2f
+        val radius = width.coerceAtMost(height) / 2f
+        paint.color = Color.GRAY
+        canvas.drawCircle(
+            centerX,
+            centerY,
+            radius/2,
+            paint
+        )
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -65,14 +80,12 @@ class ArcView(
             MotionEvent.ACTION_DOWN -> {
                 val dx = event.x - centerX
                 val dy = event.y - centerY
-                buttonClicked = getIndexByCoordinate(dy, dx)
+                val index = getIndexByCoordinate(dy,dx)
+                buttonClicked = index
+                onArcClickListener?.invoke(index)
                 invalidate()
             }
 
-            MotionEvent.ACTION_UP -> {
-                buttonClicked = -1
-                invalidate()
-            }
         }
         return true
     }
@@ -82,4 +95,5 @@ class ArcView(
         val adjustedAngle = (angle + 360) % 360
         return (adjustedAngle / sweepAngle).toInt()
     }
+
 }
